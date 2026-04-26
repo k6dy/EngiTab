@@ -1,0 +1,68 @@
+@import "tailwindcss";
+
+:root {
+  background: #090711;
+  color: #f5f3ff;
+  font-family:
+    "JetBrains Mono",
+    "SFMono-Regular",
+    Consolas,
+    monospace;
+}
+
+html {
+  background: #090711;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at top left, rgba(124, 58, 237, 0.22), transparent 32%),
+    radial-gradient(circle at bottom right, rgba(217, 70, 239, 0.14), transparent 32%),
+    linear-gradient(180deg, #090711 0%, #07050d 100%);
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+  background-size: 42px 42px;
+  mask-image: linear-gradient(to bottom, black, transparent 85%);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+::selection {
+  background: #8b5cf6;
+  color: white;
+}
+
+button,
+input {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+.terminal-card {
+  border: 1px solid rgba(139, 92, 246, 0.22);
+  background: rgba(255, 255, 255, 0.035);
+  box-shadow: 0 20px 80px rgba(76, 29, 149, 0.18);
+  backdrop-filter: blur(16px);
+}
+
+.terminal-line::before {
+  content: ">";
+  color: #a78bfa;
+  margin-right: 0.6rem;
+}
