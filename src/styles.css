@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 :root {
-  background: #090711;
+  background: #080713;
   color: #f5f3ff;
   font-family:
     "JetBrains Mono",
@@ -10,18 +10,19 @@
     monospace;
 }
 
-html {
-  background: #090711;
-}
-
+html,
 body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
+  background: #080713;
+}
+
+body {
   background:
-    radial-gradient(circle at top left, rgba(124, 58, 237, 0.22), transparent 32%),
-    radial-gradient(circle at bottom right, rgba(217, 70, 239, 0.14), transparent 32%),
-    linear-gradient(180deg, #090711 0%, #07050d 100%);
+    radial-gradient(circle at top, rgba(124, 58, 237, 0.18), transparent 34%),
+    radial-gradient(circle at bottom right, rgba(59, 130, 246, 0.12), transparent 34%),
+    linear-gradient(180deg, #080713 0%, #05040a 100%);
 }
 
 body::before {
@@ -30,10 +31,10 @@ body::before {
   inset: 0;
   pointer-events: none;
   background-image:
-    linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
-  background-size: 42px 42px;
-  mask-image: linear-gradient(to bottom, black, transparent 85%);
+    linear-gradient(rgba(255, 255, 255, 0.028) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.028) 1px, transparent 1px);
+  background-size: 44px 44px;
+  mask-image: linear-gradient(to bottom, black, transparent 82%);
 }
 
 * {
@@ -41,7 +42,7 @@ body::before {
 }
 
 ::selection {
-  background: #8b5cf6;
+  background: #7c3aed;
   color: white;
 }
 
@@ -55,14 +56,17 @@ button {
 }
 
 .terminal-card {
-  border: 1px solid rgba(139, 92, 246, 0.22);
-  background: rgba(255, 255, 255, 0.035);
-  box-shadow: 0 20px 80px rgba(76, 29, 149, 0.18);
-  backdrop-filter: blur(16px);
+  border: 1px solid rgba(139, 92, 246, 0.18);
+  background: rgba(255, 255, 255, 0.032);
+  box-shadow: 0 24px 100px rgba(0, 0, 0, 0.22);
+  backdrop-filter: blur(18px);
 }
 
-.terminal-line::before {
-  content: ">";
-  color: #a78bfa;
-  margin-right: 0.6rem;
+.soft-card {
+  border: 1px solid rgba(139, 92, 246, 0.16);
+  background: rgba(10, 8, 24, 0.74);
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
 }
