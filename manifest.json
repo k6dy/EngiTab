@@ -2,11 +2,11 @@
   "manifest_version": 3,
   "name": "EngiTab",
   "version": "0.1.0",
-  "description": "A distraction-free engineering productivity dashboard for every new tab.",
+  "description": "A clean engineering focus dashboard for every new tab.",
   "chrome_url_overrides": {
     "newtab": "index.html"
   },
-  "permissions": ["storage", "tabs", "idle"],
+  "permissions": ["storage", "tabs", "idle", "alarms"],
   "host_permissions": ["<all_urls>"],
   "background": {
     "service_worker": "assets/background.js",
@@ -14,7 +14,7 @@
   },
   "content_scripts": [
     {
-      "matches": ["<all_urls>"],
+      "matches": ["http://*/*", "https://*/*"],
       "js": ["assets/content.js"],
       "run_at": "document_idle"
     }

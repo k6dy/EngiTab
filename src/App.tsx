@@ -7,7 +7,6 @@ import {
   Code2,
   ExternalLink,
   Focus,
-  Mail,
   Plus,
   Power,
   RotateCcw,
@@ -15,6 +14,7 @@ import {
   SquareCheck,
   Terminal,
   Trash2,
+  Zap,
 } from "lucide-react";
 import { calculateFocusScore } from "./lib/scoring";
 import {
@@ -23,15 +23,18 @@ import {
   getDailyStats,
   getFocusSession,
   getGoals,
+  getLastFocusSession,
   saveAssignments,
   saveFocusSession,
   saveGoals,
+  saveLastFocusSession,
 } from "./lib/storage";
 import type {
   AssignmentItem,
   DailyStats,
   FocusSession,
   GoalItem,
+  LastFocusSession,
 } from "./lib/storage";
 import { QUICK_LINKS, TOOL_LABELS } from "./data/defaultSites";
 import { formatMinutes } from "./lib/time";
@@ -39,25 +42,31 @@ import "./styles.css";
 
 function getGreeting() {
   const hour = new Date().getHours();
-
   if (hour < 12) return "Good morning";
   if (hour < 18) return "Good afternoon";
   return "Good evening";
 }
 
-function formatTimer(startedAt: number | null) {
+function formatTimerFromSeconds(totalSeconds: number) {
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+
+  return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(
+    2,
+    "0"
+  )}`;
+}
+
+function formatActiveTimer(startedAt: number | null) {
   if (!startedAt) return "00:00";
-
   const seconds = Math.floor((Date.now() - startedAt) / 1000);
-  const mins = Math.floor(seconds / 60);
-  const secs = seconds % 60;
-
-  return `${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
+  return formatTimerFromSeconds(seconds);
 }
 
 export default function App() {
   const [stats, setStats] = useState<DailyStats | null>(null);
   const [session, setSession] = useState<FocusSession | null>(null);
+  const [lastSession, setLastSession] = useState<LastFocusSession | null>(null);
   const [timerDisplay, setTimerDisplay] = useState("00:00");
 
   const [goal, setGoal] = useState("Engineering deep work");
@@ -70,37 +79,44 @@ export default function App() {
   const [newAssignmentDue, setNewAssignmentDue] = useState("");
 
   async function refresh() {
-    const [dailyStats, focusSession, storedGoals, storedAssignments] =
-      await Promise.all([
-        getDailyStats(),
-        getFocusSession(),
-        getGoals(),
-        getAssignments(),
-      ]);
+    const [
+      dailyStats,
+      focusSession,
+      storedGoals,
+      storedAssignments,
+      storedLastSession,
+    ] = await Promise.all([
+      getDailyStats(),
+      getFocusSession(),
+      getGoals(),
+      getAssignments(),
+      getLastFocusSession(),
+    ]);
 
     setStats(dailyStats);
     setSession(focusSession);
     setGoal(focusSession.goal);
     setGoals(storedGoals);
     setAssignments(storedAssignments);
+    setLastSession(storedLastSession);
   }
 
   useEffect(() => {
     refresh();
 
-    const interval = window.setInterval(() => {
+    const refreshInterval = window.setInterval(() => {
       refresh();
     }, 5000);
 
-    return () => window.clearInterval(interval);
+    return () => window.clearInterval(refreshInterval);
   }, []);
 
   useEffect(() => {
-    const interval = window.setInterval(() => {
-      setTimerDisplay(formatTimer(session?.startedAt ?? null));
+    const timerInterval = window.setInterval(() => {
+      setTimerDisplay(formatActiveTimer(session?.startedAt ?? null));
     }, 1000);
 
-    return () => window.clearInterval(interval);
+    return () => window.clearInterval(timerInterval);
   }, [session]);
 
   const focusScore = useMemo(() => {
@@ -113,7 +129,7 @@ export default function App() {
 
     return Object.values(stats.domains)
       .sort((a, b) => b.seconds - a.seconds)
-      .slice(0, 4);
+      .slice(0, 5);
   }, [stats]);
 
   async function startFocus() {
@@ -130,6 +146,17 @@ export default function App() {
   }
 
   async function stopFocus() {
+    const now = Date.now();
+    const startedAt = session?.startedAt ?? now;
+    const durationSeconds = Math.max(0, Math.floor((now - startedAt) / 1000));
+
+    const completedSession: LastFocusSession = {
+      goal,
+      startedAt,
+      endedAt: now,
+      durationSeconds,
+    };
+
     const updated: FocusSession = {
       active: false,
       startedAt: null,
@@ -137,7 +164,10 @@ export default function App() {
       goal,
     };
 
+    await saveLastFocusSession(completedSession);
     await saveFocusSession(updated);
+
+    setLastSession(completedSession);
     setSession(updated);
     setTimerDisplay("00:00");
   }
@@ -240,8 +270,8 @@ export default function App() {
           </h1>
 
           <p className="mx-auto mt-4 max-w-2xl leading-8 text-neutral-400">
-            Keep your core tools, goals, assignments, and focus timer in one
-            quiet workspace.
+            A clean command center for coursework, technical tools, focus
+            sessions, and daily productivity signals.
           </p>
         </section>
 
@@ -259,42 +289,39 @@ export default function App() {
                 className="group rounded-2xl border border-violet-500/10 bg-white/[0.045] p-4 text-left transition hover:-translate-y-1 hover:border-violet-400/50 hover:bg-violet-500/10"
               >
                 <div className="flex items-center justify-between">
-                  <span className="font-black text-violet-50">{link.label}</span>
+                  <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-violet-500/15 text-sm font-black text-violet-200">
+                    {link.short}
+                  </div>
                   <ExternalLink
                     size={15}
                     className="text-neutral-500 transition group-hover:text-violet-300"
                   />
                 </div>
-                <p className="mt-2 text-xs text-neutral-500">{link.hint}</p>
+
+                <p className="mt-3 font-black text-violet-50">{link.label}</p>
+                <p className="mt-1 text-xs text-neutral-500">{link.hint}</p>
               </a>
             ))}
           </div>
         </section>
 
-        <section className="mt-8 grid gap-4 md:grid-cols-4">
+        <section className="mt-8 grid gap-4 md:grid-cols-5">
           <Metric icon={<Activity />} label="Focus Score" value={`${focusScore}%`} />
-          <Metric
-            icon={<Code2 />}
-            label="Engineering Time"
-            value={formatMinutes(stats?.productiveSeconds ?? 0)}
-          />
+          <Metric icon={<Code2 />} label="Work" value={formatMinutes(stats?.workSeconds ?? 0)} />
           <Metric
             icon={<ShieldAlert />}
-            label="Blocked"
-            value={String(stats?.blockedAttempts ?? 0)}
+            label="Distraction"
+            value={formatMinutes(stats?.distractionSeconds ?? 0)}
           />
-          <Metric
-            icon={<Clock />}
-            label="Session"
-            value={session?.active ? timerDisplay : "00:00"}
-          />
+          <Metric icon={<Clock />} label="Idle" value={formatMinutes(stats?.idleSeconds ?? 0)} />
+          <Metric icon={<Zap />} label="Active" value={session?.active ? timerDisplay : "00:00"} />
         </section>
 
         <section className="mt-8 grid gap-5 lg:grid-cols-[0.8fr_1.2fr]">
           <div className="terminal-card rounded-3xl p-6">
             <div className="flex items-center gap-2">
               <Focus className="text-violet-300" />
-              <h2 className="text-2xl font-black">Focus</h2>
+              <h2 className="text-2xl font-black">Focus Session</h2>
             </div>
 
             <label className="mt-5 block">
@@ -308,13 +335,19 @@ export default function App() {
               />
             </label>
 
-            <div className="mt-5 rounded-2xl border border-violet-500/10 bg-[#100d1c] p-5 text-center">
-              <p className="text-xs uppercase tracking-[0.25em] text-neutral-500">
-                Active Timer
-              </p>
-              <p className="mt-2 text-5xl font-black text-violet-200">
-                {session?.active ? timerDisplay : "00:00"}
-              </p>
+            <div className="mt-5 grid gap-3 sm:grid-cols-2">
+              <TimerPanel
+                label="Active Timer"
+                value={session?.active ? timerDisplay : "00:00"}
+              />
+              <TimerPanel
+                label="Last Session"
+                value={
+                  lastSession
+                    ? formatTimerFromSeconds(lastSession.durationSeconds)
+                    : "00:00"
+                }
+              />
             </div>
 
             <div className="mt-5">
@@ -342,64 +375,51 @@ export default function App() {
               className="mt-3 flex w-full items-center justify-center gap-2 rounded-2xl border border-neutral-700 px-5 py-4 font-black text-neutral-300 transition hover:bg-white/5"
             >
               <RotateCcw size={18} />
-              Reset Stats
+              Reset Today’s Stats
             </button>
           </div>
 
           <div className="terminal-card rounded-3xl p-6">
-            <div className="mb-5 flex items-center gap-2">
-              <Mail className="text-violet-300" />
-              <h2 className="text-2xl font-black">Today</h2>
+            <h2 className="text-2xl font-black">Usage Breakdown</h2>
+
+            <div className="mt-5 grid gap-3 md:grid-cols-3">
+              <UsageBlock label="Work" value={formatMinutes(stats?.workSeconds ?? 0)} />
+              <UsageBlock
+                label="Distraction"
+                value={formatMinutes(stats?.distractionSeconds ?? 0)}
+              />
+              <UsageBlock label="Idle" value={formatMinutes(stats?.idleSeconds ?? 0)} />
             </div>
 
-            <div className="grid gap-5 md:grid-cols-2">
-              <Panel title="Top Domains">
+            <div className="mt-6">
+              <h3 className="font-black text-violet-100">Top Domains</h3>
+
+              <div className="mt-4 space-y-3">
                 {topDomains.length === 0 ? (
                   <p className="text-sm text-neutral-400">
-                    Browse normally and usage appears here.
+                    Browse normally and tracked usage will appear here.
                   </p>
                 ) : (
-                  <div className="space-y-3">
-                    {topDomains.map((domain) => (
-                      <div
-                        key={domain.domain}
-                        className="flex items-center justify-between rounded-2xl bg-[#100d1c] p-4"
-                      >
-                        <div>
-                          <p className="font-black">
-                            {TOOL_LABELS[domain.domain] ?? domain.domain}
-                          </p>
-                          <p className="text-xs uppercase tracking-widest text-neutral-500">
-                            {domain.category}
-                          </p>
-                        </div>
-                        <p className="font-black text-violet-300">
-                          {formatMinutes(domain.seconds)}
+                  topDomains.map((domain) => (
+                    <div
+                      key={domain.domain}
+                      className="flex items-center justify-between rounded-2xl bg-[#100d1c] p-4"
+                    >
+                      <div>
+                        <p className="font-black">
+                          {TOOL_LABELS[domain.domain] ?? domain.domain}
+                        </p>
+                        <p className="text-xs uppercase tracking-widest text-neutral-500">
+                          {domain.category}
                         </p>
                       </div>
-                    ))}
-                  </div>
+                      <p className="font-black text-violet-300">
+                        {formatMinutes(domain.seconds)}
+                      </p>
+                    </div>
+                  ))
                 )}
-              </Panel>
-
-              <Panel title="Assignments">
-                {assignments.length === 0 ? (
-                  <p className="text-sm text-neutral-400">
-                    Add Canvas tasks below.
-                  </p>
-                ) : (
-                  <div className="space-y-3">
-                    {assignments.slice(0, 4).map((assignment) => (
-                      <AssignmentRow
-                        key={assignment.id}
-                        assignment={assignment}
-                        onToggle={() => toggleAssignment(assignment.id)}
-                        onDelete={() => deleteAssignment(assignment.id)}
-                      />
-                    ))}
-                  </div>
-                )}
-              </Panel>
+              </div>
             </div>
           </div>
         </section>
@@ -423,7 +443,7 @@ export default function App() {
               />
               <button
                 onClick={addGoal}
-                className="rounded-2xl bg-violet-600 px-5 font-black transition hover:bg-violet-500"
+                className="flex items-center justify-center rounded-2xl bg-violet-600 px-5 font-black transition hover:bg-violet-500"
               >
                 <Plus />
               </button>
@@ -475,7 +495,7 @@ export default function App() {
               />
               <button
                 onClick={addAssignment}
-                className="rounded-2xl bg-violet-600 px-5 font-black transition hover:bg-violet-500"
+                className="flex items-center justify-center rounded-2xl bg-violet-600 px-5 font-black transition hover:bg-violet-500"
               >
                 <Plus />
               </button>
@@ -524,17 +544,24 @@ function Metric({
   );
 }
 
-function Panel({
-  title,
-  children,
-}: {
-  title: string;
-  children: React.ReactNode;
-}) {
+function TimerPanel({ label, value }: { label: string; value: string }) {
   return (
-    <div className="soft-card rounded-3xl p-5">
-      <h3 className="mb-4 font-black text-violet-100">{title}</h3>
-      {children}
+    <div className="rounded-2xl border border-violet-500/10 bg-[#100d1c] p-5 text-center">
+      <p className="text-xs uppercase tracking-[0.25em] text-neutral-500">
+        {label}
+      </p>
+      <p className="mt-2 text-4xl font-black text-violet-200">{value}</p>
+    </div>
+  );
+}
+
+function UsageBlock({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-2xl border border-violet-500/10 bg-[#100d1c] p-4">
+      <p className="text-xs uppercase tracking-widest text-neutral-500">
+        {label}
+      </p>
+      <p className="mt-2 text-xl font-black text-violet-200">{value}</p>
     </div>
   );
 }

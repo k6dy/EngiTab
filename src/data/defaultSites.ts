@@ -23,7 +23,7 @@ export const PRODUCTIVE_SITES = [
   "kaggle.com",
   "figma.com",
   "notion.so",
-  "youtube.com"
+  "youtube.com",
 ];
 
 export const DISTRACTING_SITES = [
@@ -35,7 +35,7 @@ export const DISTRACTING_SITES = [
   "netflix.com",
   "twitch.tv",
   "hulu.com",
-  "disneyplus.com"
+  "disneyplus.com",
 ];
 
 export const TOOL_LABELS: Record<string, string> = {
@@ -53,7 +53,7 @@ export const TOOL_LABELS: Record<string, string> = {
   "developer.mozilla.org": "MDN Docs",
   "learn.microsoft.com": "Microsoft Learn",
   "mathworks.com": "MATLAB Docs",
-  "matlab.mathworks.com": "MATLAB Online",
+  "matlab.mathworks.com": "MATLAB",
   "overleaf.com": "Overleaf",
   "desmos.com": "Desmos",
   "wolframalpha.com": "WolframAlpha",
@@ -62,58 +62,68 @@ export const TOOL_LABELS: Record<string, string> = {
   "kaggle.com": "Kaggle",
   "figma.com": "Figma",
   "notion.so": "Notion",
-  "youtube.com": "YouTube"
+  "youtube.com": "YouTube",
 };
 
 export const QUICK_LINKS = [
   {
     label: "Canvas",
+    short: "C",
     url: "https://canvas.instructure.com",
-    hint: "assignments"
+    hint: "assignments",
   },
   {
-    label: "Microsoft 365",
+    label: "Microsoft",
+    short: "M",
     url: "https://www.office.com",
-    hint: "docs + files"
+    hint: "docs",
   },
   {
     label: "Outlook",
+    short: "O",
     url: "https://outlook.office.com",
-    hint: "school email"
+    hint: "email",
   },
   {
     label: "Gmail",
+    short: "G",
     url: "https://mail.google.com",
-    hint: "personal email"
+    hint: "email",
   },
   {
     label: "ChatGPT",
+    short: "AI",
     url: "https://chatgpt.com",
-    hint: "study support"
+    hint: "study",
   },
   {
     label: "MATLAB",
+    short: "ML",
     url: "https://matlab.mathworks.com",
-    hint: "engineering"
+    hint: "tools",
   },
   {
     label: "GitHub",
+    short: "GH",
     url: "https://github.com",
-    hint: "code"
+    hint: "code",
   },
   {
     label: "YouTube",
+    short: "YT",
     url: "https://youtube.com",
-    hint: "learning"
+    hint: "learning",
   },
   {
     label: "Overleaf",
+    short: "OV",
     url: "https://www.overleaf.com",
-    hint: "reports"
+    hint: "reports",
   },
   {
-    label: "WolframAlpha",
+    label: "Wolfram",
+    short: "W",
     url: "https://www.wolframalpha.com",
-    hint: "math"
-  }
+    hint: "math",
+  },
 ];

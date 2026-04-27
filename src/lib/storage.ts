@@ -1,16 +1,19 @@
 import { todayKey } from "./time";
 
+export type UsageCategory = "work" | "distraction" | "neutral" | "idle";
+
 export type DomainUsage = {
   domain: string;
   seconds: number;
-  category: "productive" | "distracting" | "neutral";
+  category: UsageCategory;
 };
 
 export type DailyStats = {
   date: string;
-  productiveSeconds: number;
-  distractingSeconds: number;
+  workSeconds: number;
+  distractionSeconds: number;
   neutralSeconds: number;
+  idleSeconds: number;
   blockedAttempts: number;
   domains: Record<string, DomainUsage>;
 };
@@ -20,6 +23,13 @@ export type FocusSession = {
   startedAt: number | null;
   durationMinutes: number;
   goal: string;
+};
+
+export type LastFocusSession = {
+  goal: string;
+  startedAt: number;
+  endedAt: number;
+  durationSeconds: number;
 };
 
 export type GoalItem = {
@@ -56,15 +66,15 @@ export async function getDailyStats(): Promise<DailyStats> {
 
   const empty: DailyStats = {
     date: todayKey(),
-    productiveSeconds: 0,
-    distractingSeconds: 0,
+    workSeconds: 0,
+    distractionSeconds: 0,
     neutralSeconds: 0,
+    idleSeconds: 0,
     blockedAttempts: 0,
     domains: {},
   };
 
   await chrome.storage.local.set({ [key]: empty });
-
   return empty;
 }
 
@@ -84,6 +94,18 @@ export async function getFocusSession(): Promise<FocusSession> {
 
 export async function saveFocusSession(session: FocusSession) {
   await chrome.storage.local.set({ focusSession: session });
+}
+
+export async function getLastFocusSession(): Promise<LastFocusSession | null> {
+  const result = (await chrome.storage.local.get("lastFocusSession")) as {
+    lastFocusSession?: LastFocusSession;
+  };
+
+  return result.lastFocusSession ?? null;
+}
+
+export async function saveLastFocusSession(session: LastFocusSession) {
+  await chrome.storage.local.set({ lastFocusSession: session });
 }
 
 export async function getGoals(): Promise<GoalItem[]> {

@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 :root {
-  background: #080713;
+  background: #070712;
   color: #f5f3ff;
   font-family:
     "JetBrains Mono",
@@ -15,14 +15,16 @@ body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
-  background: #080713;
+  background: #070712;
 }
 
 body {
   background:
-    radial-gradient(circle at top, rgba(124, 58, 237, 0.18), transparent 34%),
-    radial-gradient(circle at bottom right, rgba(59, 130, 246, 0.12), transparent 34%),
-    linear-gradient(180deg, #080713 0%, #05040a 100%);
+    radial-gradient(circle at 20% 10%, rgba(124, 58, 237, 0.18), transparent 26%),
+    radial-gradient(circle at 80% 20%, rgba(37, 99, 235, 0.12), transparent 24%),
+    radial-gradient(circle at 50% 100%, rgba(168, 85, 247, 0.1), transparent 30%),
+    linear-gradient(135deg, #070712 0%, #09051a 45%, #03040a 100%);
+  overflow-x: hidden;
 }
 
 body::before {
@@ -30,11 +32,22 @@ body::before {
   position: fixed;
   inset: 0;
   pointer-events: none;
+  opacity: 0.35;
   background-image:
-    linear-gradient(rgba(255, 255, 255, 0.028) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.028) 1px, transparent 1px);
-  background-size: 44px 44px;
-  mask-image: linear-gradient(to bottom, black, transparent 82%);
+    linear-gradient(rgba(167, 139, 250, 0.055) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(167, 139, 250, 0.055) 1px, transparent 1px);
+  background-size: 64px 64px;
+  mask-image: radial-gradient(circle at center, black, transparent 78%);
+}
+
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(90deg, rgba(255,255,255,0.025), transparent 18%, transparent 82%, rgba(255,255,255,0.025)),
+    radial-gradient(circle at center, transparent 35%, rgba(0, 0, 0, 0.45));
 }
 
 * {
@@ -55,16 +68,30 @@ button {
   cursor: pointer;
 }
 
+input::placeholder {
+  color: rgba(163, 163, 163, 0.55);
+}
+
 .terminal-card {
   border: 1px solid rgba(139, 92, 246, 0.18);
-  background: rgba(255, 255, 255, 0.032);
-  box-shadow: 0 24px 100px rgba(0, 0, 0, 0.22);
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.045), rgba(255,255,255,0.022)),
+    rgba(9, 7, 24, 0.78);
+  box-shadow:
+    0 24px 90px rgba(0, 0, 0, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.045);
   backdrop-filter: blur(18px);
 }
 
 .soft-card {
-  border: 1px solid rgba(139, 92, 246, 0.16);
-  background: rgba(10, 8, 24, 0.74);
+  border: 1px solid rgba(139, 92, 246, 0.14);
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.035), rgba(255,255,255,0.018)),
+    rgba(10, 8, 24, 0.7);
+}
+
+.no-scrollbar {
+  scrollbar-width: none;
 }
 
 .no-scrollbar::-webkit-scrollbar {
